@@ -1,8 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import { Component, useState, } from 'react';
 import { Button, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
-
-
+import HistoryView from './History'
 class App extends Component {
 
   constructor(){
@@ -11,15 +10,32 @@ class App extends Component {
         resultText: '',
         out: '',
         signal: 0,
-        status: false
+        status1: false,
+        status2: false,
+        cal_text:[],
+
     }
+    this.clear = this.clear.bind(this)
     this.operations = ['AC','DEL','+','-','*','/','^','√']
     this.Math_op = [['sin', 'cos', 'tan'],['e', '𝝅', '$']]
   }
 
-  toggleStatus(){
+  clear(){
+    let temp = []
     this.setState({
-      status:!this.state.status
+      cal_text:temp,
+    });
+  }
+
+  toggleStatus1(){
+    this.setState({
+      status1:!this.state.status1
+    });
+  }
+
+  toggleStatus2(){
+    this.setState({
+      status2:!this.state.status2
     });
   }
 
@@ -43,13 +59,14 @@ class App extends Component {
       
     } catch (e) {
       res = 'Syntax ERROR'
-      
-      
     }
     
     this.setState({
       out: res
     })
+    var temp = this.state.resultText + '\n='+res
+    this.state.cal_text.push(temp)
+    console.log(this.state.cal_text)
     
   }
 
@@ -57,9 +74,11 @@ class App extends Component {
     console.log(text)
 
     if(text == '='){
+      
       this.setState({
-        signal: 1
-    })
+        signal: 1,
+      })
+
       return this.calculateResult()
     }
 
@@ -274,43 +293,53 @@ class App extends Component {
       
       m.push(<View style = {styles.row}>{row}</View>)
     }
-    
-    
+
     return(
+        
+          
         <View style = {styles.container}>
-            <View style = {styles.result}>
-                <Text style = {styles.resultText}>{this.state.resultText}</Text>
+            <View style = {styles.history}>
+              <Button title='History' onPress = {() => this.toggleStatus2()}/>
             </View>
 
-            <View style = {styles.calculation}>
-                <Text style = {styles.calculationText}>{this.state.out}</Text>
-            </View>
-            
-            
-  
             {
-              this.state.status?
-                <View style = {styles.math}>
-                  <View style = {styles.numbers}>
-                      {m}
+              this.state.status2?
+                <HistoryView cal = {this.state.cal_text}  allclear = {this.clear}/>
+              : 
+                <>
+                  <View style = {styles.result}>
+                      <Text style = {styles.resultText}>{this.state.resultText}</Text>
                   </View>
-                </View>
-              :
-                <View style = {styles.buttons}>
-                  <View style = {styles.numbers}>
-                      {rows}
-                  </View>
-                  <View style = {styles.operations}>
-                      {ops}
-                  </View>
-                </View>
-            }
 
-            <View style = {styles.nextPage}>
-                  <TouchableOpacity style = {styles.btn} onPress = {() => this.toggleStatus()}>
-                    <Text style = {styles.nextText}>{'-->'}</Text>
-                  </TouchableOpacity>
-            </View>
+                  <View style = {styles.calculation}>
+                      <Text style = {styles.calculationText}>{this.state.out}</Text>
+                  </View>
+                  {
+                    this.state.status1?
+                      <View style = {styles.math}>
+                        <View style = {styles.numbers}>
+                            {m}
+                        </View>
+                        
+                      </View>
+                    :
+                      <View style = {styles.buttons}>
+                        <View style = {styles.numbers}>
+                            {rows}
+                        </View>
+                        <View style = {styles.operations}>
+                            {ops}
+                        </View>
+                      </View>
+                  }
+                  <View style = {styles.nextPage}>
+                        <TouchableOpacity style = {styles.btn} onPress = {() => this.toggleStatus1()}>
+                          <Text style = {styles.nextText}>{'-->'}</Text>
+                        </TouchableOpacity>
+                  </View>
+                </>
+              
+            }
         </View>
     )
   }
@@ -322,12 +351,12 @@ const styles = StyleSheet.create({
       
     },
     resultText:{
-      fontSize: 40,
+      fontSize: 50,
       color: 'black',
       
     },
     calculationText:{
-      fontSize: 34,
+      fontSize: 44,
       color: 'black'
     },
     row:{
@@ -389,7 +418,15 @@ const styles = StyleSheet.create({
     math: {
       flexGrow: 8,
       flexDirection: 'row'
-    }
+    },
+    history: {
+      // flex: 0.4,
+      height: 22,
+      flexDirection: 'row',
+      justifyContent: 'right',
+      alignItems: 'center',
+    },
+    
 });
 
 
