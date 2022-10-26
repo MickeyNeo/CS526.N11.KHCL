@@ -1,87 +1,111 @@
-// import { StatusBar } from 'expo-status-bar';
-// import { Component, useState, } from 'react';
-// import { Button, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
-// import { SafeAreaView, ScrollView } from 'react-native'
-// class HistoryView extends Component {
-  
-//   constructor(){
-//     super();
-//     this.state = {
-//         search: '',
-//     }
-//   }
-
-//   filterList(list) {
-//     return list.filter(
-//       (listItem) =>
-//         listItem.cal.includes(this.state.search) ||
-//         listItem.res.includes(this.state.search),
-//     );
-//   }
-
-//   render(){
-
-//     let list = [] 
-//     for(let i = 0; i < this.props.cal.length; i++){
-//         list.push("{cal: '" + this.props.cal[i] + "', res: '" + this.props.res[i]+ "'}")
-//         console.log("{cal: '" + this.props.cal[i] + "', res: '" + this.props.res[i]+ "'}")
-//     }
-//     console.log(list)
-//     return(
-//         <View style={styles.contain}>
-//             <input type= {'text'} placeholder = {'Search...'} style = {styles.search}/>
-//             {this.filterList(list).map((listItem, index) => (
-//                 <ScrollView>
-//                     {list_his}
-//                 </ScrollView>
-//                 // <Item key={index} cal={listItem.cal} res={listItem.res} />
-//             ))}
-            
-//         </View>
-//     )
-//   }
-// }
-
-// const styles = StyleSheet.create({
-//     contain: {
-      
-   
-// });
-// export default HistoryView
-
 import React, {Component} from 'react';
-import {View, Text, TextInput, StyleSheet, TouchableOpacity,Image} from 'react-native';
+import {SafeAreaView,FlatList,View, Text, TextInput, StyleSheet, TouchableOpacity,Image} from 'react-native';
+const NO_WIDTH_SPACE = '​'; // This is a special char you should copy and paste, not an empty string! 
+// read on stack overflow with key word 2light
+
+const highlight = string =>
+  string.split(' ').map((word, i) => (
+    <Text key={i}>
+      <Text style={[styles.itemText, {backgroundColor:'black'}]}>{word}</Text>
+      {NO_WIDTH_SPACE}
+    </Text>
+  ));
 
 class HistoryView extends Component {
   state = {
     search: '',
+    data: this.props.data_his,
+    stickyHeaderIndices: [],
   };
 
-  filterList(list) {
-    return list.filter(listItem => listItem.includes(this.state.search));
-  }
 
+  
   _allclear(){
     this.props.allclear();
+    this.setState({
+      data: this.props.data_his,
+      stickyHeaderIndices: []
+    })
   }
+  renderItem = ({ item }) => {
+    if(item.cal_flg == -1 && item.res_flg == -1){
+      return(
+        <View style = {styles.contain_itemText}>
+            <Text style = {styles.itemText} >
+              {item.cal_text}</Text>
+            <Text style = {styles.itemText} >
+              {item.res_text}</Text>
+        </View>
+      )
+    }
+    let cal_1 = item.cal_text
+    let cal_2 = ''
+    let cal_3 = ''
+    if(item.cal_flg != -1){
+      cal_1 = item.cal_text.slice(0,item.cal_flg)
+      cal_2 = item.cal_text.slice(item.cal_flg,this.state.search.length + item.cal_flg)
+      cal_3 = item.cal_text.slice(this.state.search.length + item.cal_flg,item.cal_text.length)
+    }
+
+    let res_1 = item.res_text
+    let res_2 = ''
+    let res_3 = ''
+    if(item.res_flg != -1){
+      res_1 = item.res_text.slice(0,item.res_flg)
+      res_2 = item.res_text.slice(item.res_flg,this.state.search.length + item.res_flg)
+      res_3 = item.res_text.slice(this.state.search.length + item.res_flg,item.res_text.length)
+    }
+    return (
+      <View style = {styles.contain_itemText}>
+          <Text style = {styles.itemText} >
+            {cal_1}{highlight(cal_2)}{cal_3}</Text>
+          <Text style = {styles.itemText} >
+            {res_1}{highlight(res_2)}{res_3}</Text>
+      </View>
+    );};
+
+    filterList(list) {
+      return list.filter((listItem) => {
+        listItem.cal_flg = -1
+        if (listItem.cal_text.includes(this.state.search)&& this.state.search!=''){
+          listItem.cal_flg = listItem.cal_text.indexOf(this.state.search)
+        }else if(this.state.search == ''){
+          listItem.cal_flg = -1
+        }
+        listItem.res_flg = -1
+        if (listItem.res_text.includes(this.state.search)&& this.state.search!=''){
+          listItem.res_flg = listItem.res_text.indexOf(this.state.search)
+        }else if(this.state.search == ''){
+          listItem.res_flg = -1
+        }
+
+        return (
+          listItem.cal_text.includes(this.state.search) 
+          || listItem.res_text.includes(this.state.search)
+        )});
+
+    }
+    
 
   render() {
     
-    let list = this.props.cal
     return (
       <View style={styles.container}>
-
         <TextInput
           onChangeText={(search) => this.setState({search})}
           style={styles.searchBar}
           placeholder = {"Search here..."}
         />
-        <TouchableOpacity onPress={() => this._allclear()} style = {styles.btn}>
-            aa
+        <TouchableOpacity onPress={() => this._allclear()} style = {styles.btn} >
+          <Text>Remove all</Text>
         </TouchableOpacity>
-        {this.filterList(list).map((listItem, index) => (
-            <Text key={index} style={styles.itemText}>{listItem}</Text>
-        ))}
+        
+        <View>
+          <FlatList data={this.filterList(this.state.data)}
+          renderItem= {this.renderItem} 
+          keyExtractor={item => item.id} 
+          stickyHeaderIndices={this.state.stickyHeaderIndices} />
+        </View>
         
       </View>
     );
@@ -96,16 +120,18 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
   //   alignItems: 'flex-end'
   },
+  contain_itemText: {
+    borderColor: 'black',
+    borderWidth: 1,
+    marginTop: 5,
+  },
   itemText: {
       color: 'white',
       fontSize: 30,
       textAlign: 'right',
       width: '100%',
-      height: 80,
+      height: 40,
       backgroundColor: '#636363',
-      marginTop: 5,
-      borderColor: 'black',
-      borderWidth: 1,
       flexDirection: 'row'
 
 
@@ -119,11 +145,15 @@ const styles = StyleSheet.create({
       fontSize: 20,
   },
   btn: {
-    heigh:30,
-    alignItems: 'center',
+    heigh: 30,
+    width: 90,
     justifyContent: 'center',
-    alignSelf: 'stretch',
-    backgroundColor: 'blue',
+    textAlign: 'center',
+    backgroundColor: '#c9e9ff',
+    borderWidth: 1,
+    borderColor: 'black',
+    alignSelf: 'flex-end',
+    marginTop: 2
   },
 });
 
