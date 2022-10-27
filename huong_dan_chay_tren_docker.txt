@@ -1,3 +1,5 @@
+git clone https://github.com/MickeyNeo/CS526.N11.KHCL
 docker run -it --rm --name mayao -p 19000-19010:19000-19010 -v ${pwd}:/usr/src/app -w /usr/src/app node:16-slim bash
-cd Calculator
+cd CS526.N11.KHCL
+npm install
 npm start
