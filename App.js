@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import { Component, useState, } from 'react';
-import { Button, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { Pressable, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import HistoryView from './History'
 class App extends Component {
 
@@ -12,7 +12,8 @@ class App extends Component {
         signal: 0,
         status1: false,
         status2: false,
-        cal_text:[],
+        his_text:[],
+        id:0
 
     }
     this.clear = this.clear.bind(this)
@@ -23,7 +24,8 @@ class App extends Component {
   clear(){
     let temp = []
     this.setState({
-      cal_text:temp,
+      his_text:temp,
+      id: 0
     });
   }
 
@@ -64,9 +66,16 @@ class App extends Component {
     this.setState({
       out: res
     })
-    var temp = this.state.resultText + '\n='+res
-    this.state.cal_text.push(temp)
-    console.log(this.state.cal_text)
+    this.state.his_text.push(
+      {
+        id: this.state.id++,
+        cal_text: this.state.resultText,
+        res_text: '=' + res.toString(),
+        cal_flg: -1,
+        res_flg: -1
+      }
+    )
+    console.log(this.state.his_text)
     
   }
 
@@ -295,16 +304,13 @@ class App extends Component {
     }
 
     return(
-        
-          
         <View style = {styles.container}>
-            <View style = {styles.history}>
-              <Button title='History' onPress = {() => this.toggleStatus2()}/>
-            </View>
-
+              <Pressable style = {styles.history} onPress = {() => this.toggleStatus2()}>
+                <Text>History</Text>
+              </Pressable>
             {
               this.state.status2?
-                <HistoryView cal = {this.state.cal_text}  allclear = {this.clear}/>
+                <HistoryView data_his = {this.state.his_text}  allclear = {this.clear}/>
               : 
                 <>
                   <View style = {styles.result}>
@@ -420,11 +426,19 @@ const styles = StyleSheet.create({
       flexDirection: 'row'
     },
     history: {
-      // flex: 0.4,
-      height: 22,
-      flexDirection: 'row',
-      justifyContent: 'right',
+      backgroundColor: '#c9e9ff',
       alignItems: 'center',
+      textAlign: 'center',
+      alignSelf: 'flex-end',
+      marginTop: 30,
+      marginBottom: 5,
+      borderWidth: 1,
+      borderColor: 'black',
+      borderRadius: 5,
+      paddingTop: 5,
+      paddingBottom: 5,
+      paddingLeft: 10,
+      paddingRight: 10,
     },
     
 });
