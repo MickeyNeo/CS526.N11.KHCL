@@ -1,10 +1,14 @@
 import { StatusBar } from 'expo-status-bar';
 import { Component, } from 'react';
-import { Pressable, StyleSheet, Text, View, TouchableOpacity, Dimensions } from 'react-native';
+import { Pressable, StyleSheet, Text, View, TouchableOpacity, Dimensions, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import HistoryView from './History'
 
 const windowWidth = Dimensions.get('window').width;
 const  windowHeight = Dimensions.get('window').height;
+const screen = Dimensions.get("screen");
+
+
 class App extends Component {
   constructor(){
     super()
@@ -15,8 +19,9 @@ class App extends Component {
         status1: false,
         status2: false,
         his_text:[],
+        x: ['8+9=17'],
         id:0,
-        dimensions: {
+        Dimensions: {
           screen
         }
     }
@@ -53,10 +58,9 @@ class App extends Component {
 
   toggleStatus2(){
     this.setState({
-      status2:!this.state.status2
-    });
+    status2:!this.state.status2})
+    this.getHis();
   }
-
   calculateResult(){
     let text = this.state.resultText
     text = text.replace('sin','Math.sin')
@@ -74,11 +78,10 @@ class App extends Component {
     let res
     try {
       res = eval(text)
-      
+      //this.inputHandle(text + toTtring(res))
     } catch (e) {
       res = 'Syntax ERROR'
     }
-    
     this.setState({
       out: res
     })
@@ -91,15 +94,38 @@ class App extends Component {
         res_flg: -1
       }
     )
-    console.log(this.state.his_text)
-    
+    this.handleSave(this.state.his_text)
   }
-
-  buttonPressed(text){
+  inputHandle = (text) => {
     console.log(text)
-
+    this.setState({...this.state, resulText: text });
+}
+  handleSave = async (value) => {
+  try {
+    console.log(value)
+    const jsonValue = JSON.stringify(value)
+    await AsyncStorage.setItem('@id', jsonValue)
+  } catch(e) {
+    Alert.alert("error")
+  }
+}
+getHis = async () => {
+  try {
+    const jsonValue = await AsyncStorage.getItem('@id')
+    const history = JSON.parse(jsonValue)
+    this.setState({...this.state, his_text: history})
+     
+    console.log(history)
+    return history 
+  } catch(e) {
+    // read error
+  }
+}
+  buttonPressed(text){
+    //console.log(text)
+    //this.inputHandle(text)
     if(text == '='){
-      
+      //this.handleSave()
       this.setState({
         signal: 1,
       })
@@ -117,7 +143,7 @@ class App extends Component {
       this.setState({
         resultText: this.state.resultText+text
       })
-      console.log(this.state.resultText)
+      //console.log(this.state.resultText)
     }
     
   }
@@ -163,7 +189,7 @@ class App extends Component {
         this.setState({
           resultText: this.state.resultText+operation
         })
-        console.log(this.state.resultText)
+        //console.log(this.state.resultText)
       }
     
   }
@@ -194,7 +220,7 @@ class App extends Component {
     switch(operation){
       case 'DEL':
         let text = this.state.resultText.split('')
-        console.log(text)
+        //console.log(text)
         text.pop()
         this.setState({
             resultText: text.join('')
@@ -285,7 +311,9 @@ class App extends Component {
       let row = []
       for(let j = 0; j < 3; j++){
         row.push(
-          <TouchableOpacity onPress={() => this.buttonPressed(nums[i][j])} style = {styles.btn}>
+          <TouchableOpacity 
+          onPress={() => this.buttonPressed(nums[i][j])}
+          style = {styles.btn}>
             <Text style = {styles.btnText}>{nums[i][j]}</Text>
           </TouchableOpacity>
         )
@@ -321,7 +349,7 @@ class App extends Component {
 
     return(
       //nếu chiều rộng gấp đôi chiều cao thì đổi
-        this.state.dimensions.screen.width/this.state.dimensions.screen.height >= 1.2?
+        this.state.Dimensions.screen.width/this.state.Dimensions.screen.height >= 1.2?
           <View style = {styles.containerLarge}>
               <View style = {styles.calculatorPart}>
                     <View style = {styles.result}>
@@ -361,7 +389,7 @@ class App extends Component {
           </View>
         :
           <View style = {styles.containerNormal} >
-                <Pressable style = {styles.history} onPress = {() => this.toggleStatus2()}>
+                <Pressable style = {styles.history} onPress = {(x) => this.toggleStatus2()}>
                   <Text>History</Text>
                 </Pressable>
                 
@@ -429,20 +457,22 @@ const styles = StyleSheet.create({
       alignItems: 'center'
     },
     result: {
+      borderRadius: 10,
       flex: 2,
       backgroundColor: 'white',
       justifyContent: 'center',
       alignItems: 'flex-end',
-      borderWidth: 1,
+      borderWidth: 5,
       borderColor: 'black',
       borderBottomColor: 'white'
     },
     calculation: {
+      borderRadius: 10,
       flex: 1,
       backgroundColor: 'white',
       justifyContent: 'center',
       alignItems: 'flex-end',
-      borderWidth: 1,
+      borderWidth: 5,
       borderColor: 'black',
       borderTopColor: 'white'
     },
@@ -455,24 +485,38 @@ const styles = StyleSheet.create({
 
     },
     btn: {
+      backgroundColor: '#082032',
+      width: 60,
+      height: 60,
+      //elevation: 25,
       flex: 1,
       alignItems: 'center',
       justifyContent: 'center',
-      alignSelf: 'stretch'
+      alignSelf: 'stretch',
+      borderRadius: 10,
+      borderColor: 'red',
+      padding: 5,
 
     },
     buttons: {
+      //width: 60,
+      //height: 60,
+      //backgroundColor: 'blue',
       flexGrow: 5,
-      flexDirection: 'row'
+      flexDirection: 'row',
+      borderRadius: 10,
+      borderColor: 'red'
     },
     numbers:{
       flex: 3,
-      backgroundColor: '#434343'
+      //backgroundColor: '#082032',
+      borderColor: 'red',
+      borderRadius: 10,
     },
     operations: {
       flex: 1,
-      justifyContent: 'space-around',
-      backgroundColor: '#636363'
+      justifyContent: 'center',
+      backgroundColor: 'red'
     },
     nextPage:{
       flex: 0.4,
