@@ -1,6 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import { Component, } from 'react';
 import { Pressable, StyleSheet, Text, View, TouchableOpacity, Dimensions } from 'react-native';
+import { TextInput } from 'react-native-web';
 import HistoryView from './History'
 
 const windowWidth = Dimensions.get('window').width;
@@ -325,7 +326,10 @@ class App extends Component {
           <View style = {styles.containerLarge}>
               <View style = {styles.calculatorPart}>
                     <View style = {styles.result}>
-                        <Text style = {styles.resultText}>{this.state.resultText}</Text>
+                        <TextInput style = {styles.resultText}
+                          onChangeText ={(resultText)=>this.setState({resultText})}
+                          value = {this.state.resultText}
+                        />
                     </View>
 
                     <View style = {styles.calculation}>
@@ -371,7 +375,10 @@ class App extends Component {
                 : 
                   <>
                     <View style = {styles.result}>
-                        <Text style = {styles.resultText}>{this.state.resultText}</Text>
+                        <TextInput style = {styles.resultText}
+                          onChangeText ={(resultText)=>this.setState({resultText})}
+                          value = {this.state.resultText}
+                        />
                     </View>
 
                     <View style = {styles.calculation}>
@@ -432,7 +439,7 @@ const styles = StyleSheet.create({
       flex: 2,
       backgroundColor: 'white',
       justifyContent: 'center',
-      alignItems: 'flex-end',
+      //alignItems: 'flex-end',
       borderWidth: 1,
       borderColor: 'black',
       borderBottomColor: 'white'
