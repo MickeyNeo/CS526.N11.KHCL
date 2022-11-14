@@ -1,7 +1,8 @@
 import { StatusBar } from 'expo-status-bar';
 import { Component, } from 'react';
 import { Pressable, StyleSheet, Text, View, TouchableOpacity,TextInput, Dimensions } from 'react-native';
-import HistoryView from './History'
+import HistoryView from './History';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const windowWidth = Dimensions.get('window').width;
 const  windowHeight = Dimensions.get('window').height;
@@ -24,7 +25,6 @@ class App extends Component {
     this.operations = ['AC','DEL','+','-','*','/','^','√']
     this.Math_op = [['sin', 'cos', 'tan'],['e', '𝝅', '$']]
   }
-
   onChange = ({ window }) => {
     this.setState({ dimensions: { window } });
   };
@@ -53,9 +53,33 @@ class App extends Component {
 
   toggleStatus2(){
     this.setState({
-      status2:!this.state.status2
+      status2:!this.state.status2,
     });
+    this.getData()
   }
+
+storeData = async (value) => {
+  try {
+    const jsonValue = JSON.stringify(value)
+    await AsyncStorage.setItem('@id', jsonValue)
+  } catch (e) {
+   console.log("ERROR store")
+  }
+}
+
+getData = async () => {
+  try {
+    const jsonValue = await AsyncStorage.getItem('@id')
+    //console.log(jsonValue)
+    const value = JSON.parse(jsonValue)
+    console.log(value)
+    this.setState({...this.state, his_text: value})
+    return this.state.his_text
+  } catch(e) {
+    console.log("ERROR load")
+  }
+}
+
 
   calculateResult(){
     let text = this.state.resultText
@@ -91,12 +115,14 @@ class App extends Component {
         res_flg: -1
       }
     )
-    console.log(this.state.his_text)
+    this.storeData(this.state.his_text)
+    //this.getData()
+    //console.log(this.state.his_text)
     
   }
 
   buttonPressed(text){
-    console.log(text)
+    //console.log(text)
 
     if(text == '='){
       
@@ -117,7 +143,7 @@ class App extends Component {
       this.setState({
         resultText: this.state.resultText+text
       })
-      console.log(this.state.resultText)
+      //console.log(this.state.resultText)
     }
     
   }
@@ -363,7 +389,7 @@ class App extends Component {
                     </View>
               </View>
               <View style = {styles.historyPart}>
-                <HistoryView data_his = {this.state.his_text}  allclear = {this.clear}/>
+                <HistoryView data_his = {this.getData()} />
               </View>
           </View>
         :
@@ -531,6 +557,5 @@ const styles = StyleSheet.create({
     }
     
 });
-
 
 export default App
