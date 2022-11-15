@@ -1,0 +1,17 @@
+(Dành cho máy tính window)
+B1: Mở Docker Destop
+B2: Mở Window PowerShell
+B3: Gõ lệnh: docker run -it --rm --name mayao -p 19000-19010:19000-19010 -v ${pwd}:/usr/src/app -w /usr/src/app node:16-slim bash
+(Tạo máy ảo để chạy)
+B4: Gõ lệnh: apt-get update
+(Cập nhật hệ thống)
+B5: Gõ lệnh: apt-get install git
+B6: Gõ lệnh: git clone https://github.com/MickeyNeo/CS526.N11.KHCL.git
+(Tải project từ github về)
+B7: Gõ lênh: cd CS526.N11.KHCL/
+B8: Gõ lệnh: cd cal
+B9: Gõ lệnh: npm install expo-cli
+(Cài expo để chạy)
+B10: Gõ lệnh: npm start
+B11: Gõ w để chạy web
+B12: Mở trình duyệt và hoàn thành
